@@ -1,3 +1,4 @@
+```c
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -12,10 +13,10 @@ struct statement
 int main()
 {
     struct statement s[20];
-    int n, i, j;
-
     int value[26] = {0};
     int known[26] = {0};
+
+    int n, i, j;
 
     printf("Enter number of statements: ");
     scanf("%d", &n);
@@ -24,7 +25,7 @@ int main()
 
     for (i = 0; i < n; i++)
     {
-        scanf(" %c = %49s", &s[i].lhs, s[i].rhs);
+        scanf(" %c = %s", &s[i].lhs, s[i].rhs);
     }
 
     printf("\nAfter Constant Propagation:\n");
@@ -32,14 +33,15 @@ int main()
     for (i = 0; i < n; i++)
     {
         char *rhs = s[i].rhs;
+        int lhsIndex = s[i].lhs - 'a';
 
-        /* Case 1: RHS is a number */
+        /* Case 1: RHS is a constant number */
         if (isdigit((unsigned char)rhs[0]))
         {
-            value[s[i].lhs - 'a'] = atoi(rhs);
-            known[s[i].lhs - 'a'] = 1;
+            value[lhsIndex] = atoi(rhs);
+            known[lhsIndex] = 1;
 
-            printf("%c = %s\n", s[i].lhs, rhs);
+            printf("%c = %d\n", s[i].lhs, value[lhsIndex]);
         }
 
         /* Case 2: RHS is a single variable */
@@ -49,16 +51,16 @@ int main()
 
             if (known[index])
             {
-                value[s[i].lhs - 'a'] = value[index];
-                known[s[i].lhs - 'a'] = 1;
+                value[lhsIndex] = value[index];
+                known[lhsIndex] = 1;
 
                 printf("%c = %d\n",
                        s[i].lhs,
-                       value[index]);
+                       value[lhsIndex]);
             }
             else
             {
-                known[s[i].lhs - 'a'] = 0;
+                known[lhsIndex] = 0;
 
                 printf("%c = %s\n",
                        s[i].lhs,
@@ -69,7 +71,7 @@ int main()
         /* Case 3: RHS is an expression */
         else
         {
-            char result[100] = "";
+            char result[100];
             int pos = 0;
 
             for (j = 0; rhs[j] != '\0'; j++)
@@ -80,12 +82,9 @@ int main()
 
                     if (known[index])
                     {
-                        char temp[20];
-
-                        sprintf(temp, "%d", value[index]);
-
-                        strcpy(&result[pos], temp);
-                        pos += strlen(temp);
+                        pos += sprintf(&result[pos],
+                                       "%d",
+                                       value[index]);
                     }
                     else
                     {
@@ -104,13 +103,10 @@ int main()
                    s[i].lhs,
                    result);
 
-            /*
-             * An expression such as 5+5 is not stored
-             * as a constant in this simple version.
-             */
-            known[s[i].lhs - 'a'] = 0;
+            known[lhsIndex] = 0;
         }
     }
 
     return 0;
 }
+```
