@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    int n, i;
+    char result[10], op1[10], op2[10], op;
+
+    printf("Enter number of three address statements: ");
+    scanf("%d", &n);
+
+    printf("Enter the three address code:\n");
+
+    for(i = 0; i < n; i++)
+    {
+        scanf("%s = %s %c %s", result, op1, &op, op2);
+
+        printf("\nTAC: %s = %s %c %s\n", result, op1, op, op2);
+        printf("8086 Assembly:\n");
+
+        switch(op)
+        {
+            case '+':
+                printf("MOV AX, %s\n", op1);
+                printf("ADD AX, %s\n", op2);
+                printf("MOV %s, AX\n", result);
+                break;
+
+            case '-':
+                printf("MOV AX, %s\n", op1);
+                printf("SUB AX, %s\n", op2);
+                printf("MOV %s, AX\n", result);
+                break;
+
+            case '*':
+                printf("MOV AX, %s\n", op1);
+                printf("MUL %s\n", op2);
+                printf("MOV %s, AX\n", result);
+                break;
+
+            case '/':
+                printf("MOV AX, %s\n", op1);
+                printf("DIV %s\n", op2);
+                printf("MOV %s, AX\n", result);
+                break;
+
+            default:
+                printf("Invalid operator\n");
+        }
+    }
+
+    return 0;
+}
