@@ -3,6 +3,7 @@
 
 char input[100];
 int pos = 0;
+int error = 0;
 
 void E();
 void EP();
@@ -24,7 +25,6 @@ void EP()
         T();
         EP();
     }
-    /* else choose epsilon */
 }
 
 void T()
@@ -41,7 +41,6 @@ void TP()
         F();
         TP();
     }
-    /* else choose epsilon */
 }
 
 void F()
@@ -56,17 +55,17 @@ void F()
         E();
 
         if(input[pos] == ')')
+        {
             pos++;
+        }
         else
         {
-            printf("Error: Missing ')'\n");
-            return;
+            error = 1;
         }
     }
     else
     {
-        printf("Error: Invalid symbol\n");
-        return;
+        error = 1;
     }
 }
 
@@ -79,7 +78,7 @@ int main()
 
     E();
 
-    if(input[pos] == '$')
+    if(input[pos] == '$' && error == 0)
         printf("String Accepted\n");
     else
         printf("String Rejected\n");
