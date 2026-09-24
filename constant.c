@@ -1,4 +1,3 @@
-```c
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -15,7 +14,6 @@ int main()
     struct statement s[20];
     int value[26] = {0};
     int known[26] = {0};
-
     int n, i, j;
 
     printf("Enter number of statements: ");
@@ -32,68 +30,72 @@ int main()
 
     for (i = 0; i < n; i++)
     {
-        char *rhs = s[i].rhs;
-        int lhsIndex = s[i].lhs - 'a';
+        int lhs = s[i].lhs - 'a';
 
-        /* Case 1: RHS is a constant number */
-        if (isdigit((unsigned char)rhs[0]))
+        /* If RHS is a number */
+        if (isdigit(s[i].rhs[0]))
         {
-            value[lhsIndex] = atoi(rhs);
-            known[lhsIndex] = 1;
+            value[lhs] = atoi(s[i].rhs);
+            known[lhs] = 1;
 
-            printf("%c = %d\n", s[i].lhs, value[lhsIndex]);
+            printf("%c = %d\n", s[i].lhs, value[lhs]);
         }
 
-        /* Case 2: RHS is a single variable */
-        else if (strlen(rhs) == 1 && isalpha((unsigned char)rhs[0]))
+        /* If RHS is a single variable */
+        else if (strlen(s[i].rhs) == 1 &&
+                 isalpha(s[i].rhs[0]))
         {
-            int index = rhs[0] - 'a';
+            int r = s[i].rhs[0] - 'a';
 
-            if (known[index])
+            if (known[r])
             {
-                value[lhsIndex] = value[index];
-                known[lhsIndex] = 1;
+                value[lhs] = value[r];
+                known[lhs] = 1;
 
                 printf("%c = %d\n",
                        s[i].lhs,
-                       value[lhsIndex]);
+                       value[lhs]);
             }
             else
             {
-                known[lhsIndex] = 0;
+                known[lhs] = 0;
 
                 printf("%c = %s\n",
                        s[i].lhs,
-                       rhs);
+                       s[i].rhs);
             }
         }
 
-        /* Case 3: RHS is an expression */
+        /* If RHS is an expression */
         else
         {
             char result[100];
             int pos = 0;
 
-            for (j = 0; rhs[j] != '\0'; j++)
+            for (j = 0; s[i].rhs[j] != '\0'; j++)
             {
-                if (isalpha((unsigned char)rhs[j]))
-                {
-                    int index = rhs[j] - 'a';
+                char ch = s[i].rhs[j];
 
-                    if (known[index])
+                if (isalpha(ch))
+                {
+                    int r = ch - 'a';
+
+                    if (known[r])
                     {
-                        pos += sprintf(&result[pos],
-                                       "%d",
-                                       value[index]);
+                        pos += sprintf(result + pos,
+                                        "%d",
+                                        value[r]);
                     }
                     else
                     {
-                        result[pos++] = rhs[j];
+                        result[pos] = ch;
+                        pos++;
                     }
                 }
                 else
                 {
-                    result[pos++] = rhs[j];
+                    result[pos] = ch;
+                    pos++;
                 }
             }
 
@@ -103,10 +105,9 @@ int main()
                    s[i].lhs,
                    result);
 
-            known[lhsIndex] = 0;
+            known[lhs] = 0;
         }
     }
 
     return 0;
 }
-```
