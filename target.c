@@ -3,7 +3,7 @@
 
 int main()
 {
-    int n, i, j, k;
+    int n, i, j, k, pos;
     char line[100];
     char result[20], op1[20], op2[20], op;
 
@@ -17,7 +17,7 @@ int main()
     {
         fgets(line, sizeof(line), stdin);
 
-        /* Remove spaces and tabs */
+        /* Remove spaces */
         k = 0;
         for(j = 0; line[j] != '\0'; j++)
         {
@@ -28,9 +28,47 @@ int main()
         }
         line[k] = '\0';
 
-        /* Read TAC: result=op1 operator op2 */
-        sscanf(line, "%[^=]=%[^+*/-]%c%s",
-               result, op1, &op, op2);
+        /* Find = */
+        pos = 0;
+        while(line[pos] != '=' && line[pos] != '\0')
+            pos++;
+
+        if(line[pos] == '\0')
+        {
+            printf("Invalid TAC\n");
+            i--;
+            continue;
+        }
+
+        /* Result */
+        strncpy(result, line, pos);
+        result[pos] = '\0';
+
+        /* Find operator after = */
+        j = pos + 1;
+
+        while(line[j] != '+' && line[j] != '-' &&
+              line[j] != '*' && line[j] != '/' &&
+              line[j] != '\0')
+        {
+            j++;
+        }
+
+        if(line[j] == '\0')
+        {
+            printf("Invalid TAC\n");
+            i--;
+            continue;
+        }
+
+        op = line[j];
+
+        /* Operand 1 */
+        strncpy(op1, line + pos + 1, j - pos - 1);
+        op1[j - pos - 1] = '\0';
+
+        /* Operand 2 */
+        strcpy(op2, line + j + 1);
 
         printf("\nTAC: %s = %s %c %s\n", result, op1, op, op2);
         printf("8086 Assembly:\n");
@@ -60,9 +98,6 @@ int main()
                 printf("DIV %s\n", op2);
                 printf("MOV %s, AX\n", result);
                 break;
-
-            default:
-                printf("Invalid operator\n");
         }
     }
 
