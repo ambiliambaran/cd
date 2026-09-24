@@ -3,14 +3,13 @@
 
 int main()
 {
-    int n, i;
+    int n, i, j, k;
     char line[100];
     char result[20], op1[20], op2[20], op;
 
     printf("Enter number of three address statements: ");
     scanf("%d", &n);
-
-    getchar();   // remove newline left by scanf
+    getchar();
 
     printf("Enter the three address code:\n");
 
@@ -18,14 +17,20 @@ int main()
     {
         fgets(line, sizeof(line), stdin);
 
-        /* Read TAC with or without spaces */
-        if(sscanf(line, " %19[^= ] %*[\t ]=%*[\t ]%19[^+\-*/ \t]%*[\t ]%c%*[\t ]%19s",
-                  result, op1, &op, op2) != 4)
+        /* Remove spaces and tabs */
+        k = 0;
+        for(j = 0; line[j] != '\0'; j++)
         {
-            printf("Invalid TAC format!\n");
-            i--;
-            continue;
+            if(line[j] != ' ' && line[j] != '\t' && line[j] != '\n')
+            {
+                line[k++] = line[j];
+            }
         }
+        line[k] = '\0';
+
+        /* Read TAC: result=op1 operator op2 */
+        sscanf(line, "%[^=]=%[^+*/-]%c%s",
+               result, op1, &op, op2);
 
         printf("\nTAC: %s = %s %c %s\n", result, op1, op, op2);
         printf("8086 Assembly:\n");
@@ -57,7 +62,7 @@ int main()
                 break;
 
             default:
-                printf("Invalid operator!\n");
+                printf("Invalid operator\n");
         }
     }
 
