@@ -1,4 +1,3 @@
-```c
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -14,12 +13,9 @@ int main()
 {
     struct statement s[20];
     int n, i, j;
-    int value[26];
-    int known[26];
 
-    /* Initially, no variables are known as constants */
-    for (i = 0; i < 26; i++)
-        known[i] = 0;
+    int value[26] = {0};
+    int known[26] = {0};
 
     printf("Enter number of statements: ");
     scanf("%d", &n);
@@ -28,29 +24,28 @@ int main()
 
     for (i = 0; i < n; i++)
     {
-        scanf(" %c = %s", &s[i].lhs, s[i].rhs);
+        scanf(" %c = %49s", &s[i].lhs, s[i].rhs);
     }
 
     printf("\nAfter Constant Propagation:\n");
 
     for (i = 0; i < n; i++)
     {
-        char newrhs[100] = "";
-        char *p = s[i].rhs;
+        char *rhs = s[i].rhs;
 
-        /* If RHS is a number */
-        if (isdigit(p[0]))
+        /* Case 1: RHS is a number */
+        if (isdigit((unsigned char)rhs[0]))
         {
-            value[s[i].lhs - 'a'] = atoi(p);
+            value[s[i].lhs - 'a'] = atoi(rhs);
             known[s[i].lhs - 'a'] = 1;
 
-            printf("%c = %s\n", s[i].lhs, p);
+            printf("%c = %s\n", s[i].lhs, rhs);
         }
 
-        /* If RHS is a single variable */
-        else if (strlen(p) == 1 && isalpha(p[0]))
+        /* Case 2: RHS is a single variable */
+        else if (strlen(rhs) == 1 && isalpha((unsigned char)rhs[0]))
         {
-            int index = p[0] - 'a';
+            int index = rhs[0] - 'a';
 
             if (known[index])
             {
@@ -67,21 +62,21 @@ int main()
 
                 printf("%c = %s\n",
                        s[i].lhs,
-                       p);
+                       rhs);
             }
         }
 
-        /* If RHS is an expression */
+        /* Case 3: RHS is an expression */
         else
         {
-            int k = 0;
-            int all_constant = 1;
+            char result[100] = "";
+            int pos = 0;
 
-            for (j = 0; p[j] != '\0'; j++)
+            for (j = 0; rhs[j] != '\0'; j++)
             {
-                if (isalpha(p[j]))
+                if (isalpha((unsigned char)rhs[j]))
                 {
-                    int index = p[j] - 'a';
+                    int index = rhs[j] - 'a';
 
                     if (known[index])
                     {
@@ -89,36 +84,33 @@ int main()
 
                         sprintf(temp, "%d", value[index]);
 
-                        strcpy(&newrhs[k], temp);
-                        k += strlen(temp);
+                        strcpy(&result[pos], temp);
+                        pos += strlen(temp);
                     }
                     else
                     {
-                        newrhs[k++] = p[j];
-                        all_constant = 0;
+                        result[pos++] = rhs[j];
                     }
                 }
                 else
                 {
-                    newrhs[k++] = p[j];
+                    result[pos++] = rhs[j];
                 }
             }
 
-            newrhs[k] = '\0';
-
-            /*
-             * If the entire expression became a constant,
-             * we could evaluate it here.
-             * For now, we simply display the propagated expression.
-             */
-            known[s[i].lhs - 'a'] = 0;
+            result[pos] = '\0';
 
             printf("%c = %s\n",
                    s[i].lhs,
-                   newrhs);
+                   result);
+
+            /*
+             * An expression such as 5+5 is not stored
+             * as a constant in this simple version.
+             */
+            known[s[i].lhs - 'a'] = 0;
         }
     }
 
     return 0;
 }
-```
