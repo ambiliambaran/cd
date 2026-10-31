@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 
 int n;
@@ -17,7 +18,6 @@ void eclosure(int state)
         {
             int j, found = 0;
 
-            /* Check whether state is already present */
             for(j = 0; j < count; j++)
             {
                 if(closure[j] == i)
@@ -27,7 +27,6 @@ void eclosure(int state)
                 }
             }
 
-            /* If not present, find its epsilon closure */
             if(!found)
             {
                 eclosure(i);
@@ -43,6 +42,12 @@ int main()
     printf("Enter number of states: ");
     scanf("%d", &n);
 
+    if(n < 1 || n > 20)
+    {
+        printf("Invalid number of states!\n");
+        return 0;
+    }
+
     printf("Enter epsilon transition matrix:\n");
 
     for(i = 0; i < n; i++)
@@ -56,18 +61,28 @@ int main()
     printf("Enter the state: ");
     scanf("%d", &state);
 
-    count = 0;
+    if(state < 0 || state >= n)
+    {
+        printf("Invalid state!\n");
+        return 0;
+    }
 
+    count = 0;
     eclosure(state);
 
-    printf("E-closure(%d) = { ", state);
+    printf("E-closure(q%d) = { ", state);
 
     for(i = 0; i < count; i++)
     {
-        printf("%d ", closure[i]);
+        printf("q%d", closure[i]);
+
+        if(i < count - 1)
+        {
+            printf(", ");
+        }
     }
 
-    printf("}\n");
+    printf(" }\n");
 
     return 0;
 }
