@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 
@@ -7,17 +8,16 @@ int top = -1;
 void push(char c)
 {
     stack[++top] = c;
+    stack[top + 1] = '\0';
 }
 
 void displayStack()
 {
-    int i;
-
-    for(i = 0; i <= top; i++)
-        printf("%c", stack[i]);
+    stack[top + 1] = '\0';
+    printf("%s", stack);
 }
 
-char precedence(char a, char b)
+int precedence(char a, char b)
 {
     if(a == '$' && b == '$')
         return '=';
@@ -31,14 +31,17 @@ char precedence(char a, char b)
     if(a == '(' && b == ')')
         return '=';
 
-    if(a == '(')
-        return '<';
-
-    if(b == '(')
+    if(a == '(' || b == '(')
         return '<';
 
     if(b == ')')
         return '>';
+
+    if(a == ')' || a == 'i')
+        return '>';
+
+    if(b == 'i')
+        return '<';
 
     if(a == '+' || a == '-')
     {
@@ -65,114 +68,113 @@ int main()
 {
     char input[100];
     int i = 0;
-    char relation;
+    int j;
+    int relation;
+    char action[30];
 
     printf("Enter the input string: ");
-    scanf("%s", input);
+    scanf("%99s", input);
 
     strcat(input, "$");
 
     push('$');
 
-    printf("\n%-15s %-15s %s\n",
-           "STACK", "INPUT", "ACTION");
+    printf("\n%-15s %-15s %s\n", "STACK", "INPUT", "ACTION");
 
     while(1)
     {
-        /* Accept condition */
-        if(stack[top] == '$' && input[i] == '$')
+        /* Check for acceptance */
+        if(top == 1 && stack[0] == '$' &&
+           stack[1] == 'E' && input[i] == '$')
         {
-            printf("%-15s %-15s ACCEPT\n",
-                   stack, input + i);
+            printf("%-15s %-15s ACCEPT\n", stack, input + i);
             break;
         }
 
-        /* If input is operand i, shift */
-        if(input[i] == 'i')
+        /* Find the topmost terminal in stack */
+        j = top;
+
+        while(j >= 0 && stack[j] == 'E')
+            j--;
+
+        if(j < 0)
         {
-            push('i');
-
-            printf("%-15s %-15s SHIFT\n",
-                   stack, input + i + 1);
-
-            i++;
+            printf("ERROR\n");
+            break;
         }
 
-        /* If input is operator */
-        else
+        relation = precedence(stack[j], input[i]);
+
+        /* Shift operation */
+        if(relation == '<' || relation == '=')
         {
-            relation = precedence(stack[top], input[i]);
-
-            if(relation == '<' || relation == '=')
+            if(input[i] == '$')
             {
-                push(input[i]);
-
-                printf("%-15s %-15s SHIFT\n",
-                       stack, input + i + 1);
-
-                i++;
+                printf("ERROR\n");
+                break;
             }
-            else if(relation == '>')
+
+            push(input[i]);
+            i++;
+
+            printf("%-15s %-15s SHIFT\n", stack, input + i);
+        }
+
+        /* Reduce operation */
+        else if(relation == '>')
+        {
+            /* E -> i */
+            if(stack[top] == 'i')
             {
-                /*
-                   Reduce:
-                   Remove the symbols of one expression.
-                   For this simple parser, replace the
-                   top operand/expression by E.
-                */
+                top--;
+                push('E');
 
-                if(stack[top] == 'i')
-                {
-                    top--;
-                    push('E');
-
-                    printf("%-15s %-15s REDUCE E->i\n",
-                           stack, input + i);
-                }
-                else if(stack[top] == ')')
-                {
-                    top--;
-                    if(stack[top] == 'E')
-                        top--;
-                    if(stack[top] == '(')
-                        top--;
-
-                    push('E');
-
-                    printf("%-15s %-15s REDUCE E->(E)\n",
-                           stack, input + i);
-                }
-                else
-                {
-                    /* Reduce E operator E */
-                    if(top >= 2 &&
-                       stack[top] == 'E' &&
-                       (stack[top-1] == '+' ||
-                        stack[top-1] == '-' ||
-                        stack[top-1] == '*' ||
-                        stack[top-1] == '/') &&
-                       stack[top-2] == 'E')
-                    {
-                        char op = stack[top-1];
-
-                        top -= 3;
-                        push('E');
-
-                        printf("%-15s %-15s REDUCE E->E%cE\n",
-                               stack, input + i, op);
-                    }
-                    else
-                    {
-                        printf("ERROR\n");
-                        break;
-                    }
-                }
+                printf("%-15s %-15s REDUCE E->i\n",
+                       stack, input + i);
             }
+
+            /* E -> (E) */
+            else if(stack[top] == ')' &&
+                    top >= 2 &&
+                    stack[top - 1] == 'E' &&
+                    stack[top - 2] == '(')
+            {
+                top -= 3;
+                push('E');
+
+                printf("%-15s %-15s REDUCE E->(E)\n",
+                       stack, input + i);
+            }
+
+            /* E -> E op E */
+            else if(top >= 2 &&
+                    stack[top] == 'E' &&
+                    (stack[top - 1] == '+' ||
+                     stack[top - 1] == '-' ||
+                     stack[top - 1] == '*' ||
+                     stack[top - 1] == '/') &&
+                    stack[top - 2] == 'E')
+            {
+                char op = stack[top - 1];
+
+                top -= 3;
+                push('E');
+
+                printf("%-15s %-15s REDUCE E->E%cE\n",
+                       stack, input + i, op);
+            }
+
             else
             {
                 printf("ERROR\n");
                 break;
             }
+        }
+
+        else
+        {
+            printf("ERROR\n");
+            break;
         }
     }
 
