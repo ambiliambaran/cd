@@ -1,9 +1,12 @@
 %{
-#include "y.tab.h"
+    #include "y.tab.h"
 %}
+%option noyywrap
+%%
+
+[a-zA-Z_][a-zA-Z0-9_]* {return ID;}
+[^\n]+   {return INVALID;}
+\n   {return 0;}
 
 %%
-[a-zA-Z_][a-zA-Z0-9_]*  { return ID; }
-\n                      { return 0; }
-.                       { return INVALID; }
-%%
+
