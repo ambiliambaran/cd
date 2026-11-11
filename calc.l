@@ -1,16 +1,17 @@
 %{
-#include "y.tab.h"
-#include <stdlib.h>
+    #include "y.tab.h"
+    #include<stdlib.h>
 %}
 
 %%
-[0-9]+      { yylval = atoi(yytext); return NUMBER; }
-[ \t]       ;
-\n          { return '\n'; }
-.           { return yytext[0]; }
+
+[0-9]+   {yylval = atoi(yytext);return NUMBER;}
+[ \t]    ;
+\n       {return '\n';}
+.        {return yytext[0];}
+
 %%
 
-int yywrap()
-{
+int yywrap(){
     return 1;
 }
